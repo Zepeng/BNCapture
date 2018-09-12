@@ -4,57 +4,18 @@ $Id: README 103553 2017-04-18 09:00:54Z gcosmo $
     Geant4 - an Object-Oriented Toolkit for Simulation in HEP
     =========================================================
 
-                       Extended Example B5
+                       Boron Neutron Capture 
                        -------------------- 
 
-  Example B5 implements a double-arm spectrometer with wire chambers, 
-  hodoscopes and calorimeters.  Event simulation and collection are 
-  enabled, as well as event display and analysis.
-
+  This simulation package is based on Geant4 example basic/B5. It simulates
+  neutron capture on a boron/SiO2 sphere.
 
   1- GEOMETRY
-
-   The spectrometer consists of two detector arms 
-   (see B5DetectorConstruction).  One arm provides 
-   position and timing information of the incident particle while the 
-   other collects position, timing and energy information of the particle
-   after it has been deflected by a magnetic field centered at the 
-   spectrometer pivot point.
- 
-     - First arm:  box filled with air, also containing:
-
-         1 hodoscope (15 vertical strips of plastic scintillator)
-         1 drift chamber (5 horizontal argon gas layers with a 
-                          "virtual wire" at the center of each layer)
-
-     - Second arm:  box filled with air, also containing:
-
-         1 hodoscope (25 vertical strips of plastic scintillator)
-         1 drift chamber (5 horizontal argon gas layers with a 
-                          "virtual wire" at the center of each layer)
-         1 electromagnetic calorimeter: 
-               a box sub-divided along x,y and z
-               axes into cells of CsI 
-         1 hadronic calorimeter: 
-               a box sub-divided along x,y, and z axes
-               into cells of lead, with a layer of 
-               plastic scintillator placed at the center 
-               of each cell
-         
-      - Magnetic field region: air-filled cylinder which contains
-                              the field (see B5MagneticField)
-
-           The maximum step limit in the magnetic field region is also set 
-           via the G4UserLimits class in a similar way as in Example B2.
-           
-   The rotation angle of the second arm and the magnetic field value
-   can be set via the interactive command defined using the G4GenericMessenger 
-   class.                      
+     Stainless steel cylinder, PE plate and boron/SiO2 sphere.
 
   2- PHYSICS
 
-   This example uses the reference hadronic physics list, FTFP_BERT,
-   and also adds the G4StepLimiter process.
+   This example uses the reference HP physics list. 
 
 
   3- ACTION INITALIZATION
@@ -86,54 +47,6 @@ $Id: README 103553 2017-04-18 09:00:54Z gcosmo $
   
   5- EVENT
 
-   An event consists of the generation of a single particle which is 
-   transported through the first spectrometer arm.  Here, a scintillator 
-   hodoscope records the reference time of the particle before it passes
-   through a drift chamber where the particle position is measured. 
-   Momentum analysis is performed as the particle passes through a magnetic
-   field at the spectrometer pivot and then into the second spectrometer 
-   arm.  In the second arm, the particle passes through another hodoscope
-   and drift chamber before interacting in the electromagnetic calorimeter.
-   Here it is likely that particles will induce electromagnetic showers.  
-   The shower energy is recorded in a three-dimensional array of CsI 
-   crystals.  Secondary particles from the shower, as well as primary 
-   particles which do not interact in the CsI crystals, pass into the 
-   hadronic calorimeter.  Here, the remaining energy is collected in a 
-   three-dimensional array of scintillator-lead sandwiches.
-
-   Several aspects of the event may be changed interactively by the user:
-     - angle of the second spectrometer arm
-     - strength of magnetic field
-     - initial particle type
-     - initial momentum and angle
-     - momentum and angle spreads
-     - type of initial particle may be randomized
-   
-   The initial particle type can be changed using the G4ParticleGun command:
-     /gun/particle particleName
-     
-   The UI commands specific to this example are available in /B5 command 
-   directory:
-     /B5/detector/armAngle angle unit
-     /B5/field/value field unit
-     /B5/generator/momentum  value unit
-     /B5/generator/sigmaMomentum value unit
-     /B5/generator/sigmaAngle value unit
-     /B5/generator/randomizePrimary [true|false]
-     
-   They are implemented in 
-     B5DetectorConstruction::DefineCommands(), 
-     B5MagneticField::DefineCommands() and 
-     B5PrimaryGeneratorAction::DefineCommands() methods 
-   using G4GenericMessenger class.
-
-   In first execution of BeginOfEventAction() 
-   the hits collections identifiers are saved in data members of the class
-   and used in EndOfEventAction() for accessing
-   the hists collections and filling the accounted information in defined
-   histograms and ntuples and printing its summary in a log file.
-   The frequency of printing can be tuned with the built-in command
-     /run/printProgress  frequency
 
   6- DETECTOR RESPONSE:
 
@@ -141,43 +54,10 @@ $Id: README 103553 2017-04-18 09:00:54Z gcosmo $
      recorded in hits.  This information is recorded in the following 
      sensitive detectors:
 
-       - hodoscope:
-           particle time
-           strip ID, position and rotation
-             (see B5HodoscopeSD, B5HodoscopeHit classes)  
-
-       - drift chamber: 
+       - boron sphere: 
            particle time
            particle position
-           layer ID
-             (see B5DriftChamberSD, B5DriftChamberHit classes)  
  
-       - electromagnetic calorimeter: 
-           energy deposited in cell
-           cell ID, position and rotation
-             (see B5EMCalorimeterSD, B5EMCalorimeterHit classes)  
-  
-       - hadronic calorimeter:   
-           energy deposited in cell
-           cell column ID and row ID, position and rotation
-             (see B5HadCalorimeterSD, B5HadCalorimeterHit classes)  
-
-     The hit classes include methods GetAttDefs and CreateAttValues to define
-     and then fill extra "HepRep-style" Attributes that the visualization system
-     can use to present extra information about the hits.
-     For example, if you pick a B5HadCalorimeterHit in OpenGL or a HepRep viewer,
-     you will be shown the hit's "Hit Type", "Column ID", "Row ID",
-     "Energy Deposited" and "Position".
-     These attributes are essentially arbitrary extra pieces of information
-     (integers, doubles or strings) that are carried through the visualization.      
-     Each attribute is defined once in G4AttDef object and then is filled for
-     each hit in a G4AttValue object.
-     These attributes can also be used by commands to filter which hits are drawn:
-     /vis/filtering/hits/drawByAttribute
-     Detector Geometry and trajectories also carry HepRep-style attributes,
-     but these are filled automatically in the base classes.
-     HepRep is further described at: http://www.slac.stanford.edu/~perl/heprep/
-
   7- ANALYSIS:
 
    The analysis tools are used to accumulate statistics.
@@ -185,29 +65,11 @@ $Id: README 103553 2017-04-18 09:00:54Z gcosmo $
    constructor for the following quantities:
 
    1D histograms:
-   - Number of hits in Chamber 1
-   - Number of hits in Chamber 2
+   - Number of hits in sphere 
 
    2D histograms:
-   - Drift Chamber 1 X vs Y positions
-   - Drift Chamber 2 X vs Y positions
+   - sphere hit X vs Y positions
    
-   Ntuple:
-   - Number of hits in Chamber 1
-   - Number of hits in Chamber 2
-   - Total energy deposit in EM calorimeter
-   - Total energy deposit in Hadronic calorimeter
-   - Time of flight in Hodoscope 1
-   - Time of flight in Hodoscope 2
-   - Vector of energy deposits in EM calorimeter cells
-   - Vector of energy deposits in Hadronic calorimeter cells
-
-   The histograms and ntuple are saved in the output file in a format
-   according to a technology selected in B5Analysis.hh.
-
-   When running in multi-threading mode, the histograms and ntuple accumulated 
-   on threads are automatically merged in a single output file.
-
   8- BUILD OPTIONS:
   
   This example can be built with excluding visualization and/or
