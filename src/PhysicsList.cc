@@ -49,7 +49,7 @@
 #include "G4IonPhysicsPHP.hh"
 #include "G4IonINCLXXPhysics.hh"
 
-#include "GammaNuclearPhysics.hh"
+//#include "GammaNuclearPhysics.hh"
 
 // particles
 
@@ -99,7 +99,7 @@ PhysicsList::PhysicsList()
 
   // Gamma physics
   //
-  RegisterPhysics( new GammaNuclearPhysics("gamma"));
+  //RegisterPhysics( new GammaNuclearPhysics("gamma"));
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

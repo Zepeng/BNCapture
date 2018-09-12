@@ -1,13 +1,9 @@
 #
-# Macro file for the initialization phase of "TestEm6.cc"
+# Macro file for exampleB5
 #
-# Sets some default verbose
-# and initializes the graphic.
+# Set verbosity
 #
 /control/verbose 2
-/run/verbose 2
-#
-/run/initialize
 #
 # Use this open statement to create an OpenGL view:
 /vis/open OGL 600x600-0+0
@@ -36,10 +32,10 @@
 #/vis/viewer/set/viewpointThetaPhi 90. 0.
 #
 # Specify zoom value:
-/vis/viewer/zoom 1.4
+/vis/viewer/zoom 1.6
 #
 # Specify style (surface or wireframe):
-#/vis/viewer/set/style surface
+#/vis/viewer/set/style wireframe
 #
 # Draw coordinate axes:
 #/vis/scene/add/axes 0 0 0 1 m
@@ -69,7 +65,7 @@
 #/vis/modeling/trajectories/drawByParticleID-0/set e- blue
 #
 # To superimpose all of the events from a given run:
-/vis/scene/endOfEventAction accumulate
+#/vis/scene/endOfEventAction accumulate
 #
 # Re-establish auto refreshing and verbosity:
 /vis/viewer/set/autoRefresh true
@@ -77,3 +73,7 @@
 #
 # For file-based drivers, use this to create an empty detector view:
 #/vis/viewer/flush
+#
+# Set visualization to accumulate events into one picture
+#
+/vis/scene/endOfEventAction accumulate
