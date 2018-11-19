@@ -37,6 +37,8 @@
 #include "G4Step.hh"
 #include "G4SDManager.hh"
 #include "G4ios.hh"
+#include "G4SystemOfUnits.hh"
+#include "G4HadronicProcess.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -70,10 +72,8 @@ void B5DriftChamberSD::Initialize(G4HCofThisEvent* hce)
 G4bool B5DriftChamberSD::ProcessHits(G4Step* step, G4TouchableHistory*)
 {
   auto charge = step->GetTrack()->GetDefinition()->GetPDGCharge();
-  if (charge==0.) return true;
-  
   auto preStepPoint = step->GetPreStepPoint();
-
+  //if (charge==0.) return true;
   auto touchable = step->GetPreStepPoint()->GetTouchable();
   auto motherPhysical = touchable->GetVolume(1); // mother
   auto copyNo = motherPhysical->GetCopyNo();
@@ -88,6 +88,73 @@ G4bool B5DriftChamberSD::ProcessHits(G4Step* step, G4TouchableHistory*)
   hit->SetTime(preStepPoint->GetGlobalTime());
   
   fHitsCollection->insert(hit);
+  
+  // count processes
+  // 
+  const G4StepPoint* endPoint = step->GetPostStepPoint();
+  G4VProcess* process   = 
+                   const_cast<G4VProcess*>(endPoint->GetProcessDefinedStep());
+  
+  // check that an real interaction occured (eg. not a transportation)
+  G4StepStatus stepStatus = endPoint->GetStepStatus();
+  G4bool transmit = (stepStatus==fGeomBoundary || stepStatus==fWorldBoundary);
+  if (transmit) return true;
+                      
+  //real processes : sum track length
+  //
+  G4double stepLength = step->GetStepLength();
+  
+  //energy-momentum balance initialisation
+  //
+  const G4StepPoint* prePoint = step->GetPreStepPoint();
+  G4double Q             = - prePoint->GetKineticEnergy();
+  G4ThreeVector Pbalance = - prePoint->GetMomentum();
+  
+  //initialisation of the nuclear channel identification
+  //
+  G4ParticleDefinition* particle = step->GetTrack()->GetDefinition();
+  G4String partName = particle->GetParticleName();
+  G4String nuclearChannel = partName;
+  G4HadronicProcess* hproc = dynamic_cast<G4HadronicProcess*>(process);
+  const G4Isotope* target = NULL;
+  if (hproc) target = hproc->GetTargetIsotope();
+  G4String targetName = "XXXX";  
+  if (target) targetName = target->GetName();
+  nuclearChannel += " + " + targetName + " --> ";
+    
+  //scattered primary particle (if any)
+  //
+  G4int ih = 1;
+  if (step->GetTrack()->GetTrackStatus() == fAlive) {
+    G4double energy = endPoint->GetKineticEnergy();      
+    //
+    G4ThreeVector momentum = endPoint->GetMomentum();
+    Q        += energy;
+    Pbalance += momentum;
+    //
+    nuclearChannel += partName + " + ";
+    std::cout << "primaty scatter" << energy << std::endl;
+  }  
+  
+  //secondaries
+  //
+  const std::vector<const G4Track*>* secondary 
+                                    = step->GetSecondaryInCurrentStep();  
+  for (size_t lp=0; lp<(*secondary).size(); lp++) {
+    particle = (*secondary)[lp]->GetDefinition(); 
+    G4String name   = particle->GetParticleName();
+    G4String type   = particle->GetParticleType();      
+    G4double energy = (*secondary)[lp]->GetKineticEnergy();
+    //energy-momentum balance
+    G4ThreeVector momentum = (*secondary)[lp]->GetMomentum();
+    Q        += energy;
+    Pbalance += momentum;
+    //count e- from internal conversion together with gamma
+    if (particle == G4Electron::Electron()) particle = G4Gamma::Gamma();
+    std::cout << "secondary" << energy << std::endl;
+    //particle flag
+    //fParticleFlag[particle]++;
+  }
   
   return true;
 }

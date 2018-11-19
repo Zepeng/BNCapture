@@ -144,7 +144,7 @@ G4VPhysicalVolume* B5DetectorConstruction::Construct()
   G4Material* sphere_mat = new G4Material("sphere_mat", 2.6*g/cm3, 2);
   sphere_mat->AddMaterial(sio2, 90*perCent);
   sphere_mat->AddMaterial(boron_mat, 10*perCent);
-  G4double radius = 0.5*cm;
+  G4double radius = 5*cm;
   G4Sphere* solidShape3 =
     new G4Sphere("Shape3",
                   0, radius,
